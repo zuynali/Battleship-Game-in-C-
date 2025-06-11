@@ -185,7 +185,6 @@ public:
             return true;
         }
     }
-
     bool allShipsSunk() const {
         for (const auto ship : ships) {
             if (!ship->isSunk()) {
@@ -210,7 +209,6 @@ public:
         }
         return nullptr;
     }
-
     void draw(int offsetX, bool hideShips) const {
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int y = 0; y < GRID_SIZE; y++) {
@@ -250,7 +248,6 @@ public:
 
     }
 };
-
 class Game {
 private:
     Board playerBoard;
@@ -363,8 +360,6 @@ int main() {
     CloseWindow();
     return 0;
 }
-
-
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 
