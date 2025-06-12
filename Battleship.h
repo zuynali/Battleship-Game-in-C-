@@ -3,6 +3,7 @@
 class Battleship :
     public Ship
 {
+public:
     Battleship();
 };
 

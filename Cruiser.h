@@ -3,6 +3,7 @@
 class Cruiser :
     public Ship
 {
+public:
     Cruiser();
 };
 

@@ -2,6 +2,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 #include<iostream>
+#include<utility>  // For std::pair
 using namespace std;
 template <typename T>
 class Vector {
@@ -50,7 +51,7 @@ public:
 	}
 	Vector(const Vector& other) // Copy constructor
 	{
-		if(this!=&other)
+		if (this != &other)
 		{
 			arr = nullptr;
 			len = 0;
@@ -68,7 +69,7 @@ public:
 	{
 		delete[] arr;
 	}
-// Operators
+	// Operators
 	Vector& operator=(const Vector& other) // Copy assignment
 	{
 		if (this != &other)
@@ -166,7 +167,7 @@ public:
 		*this = res;
 		return *this;
 	}
-// Modifiers
+	// Modifiers
 	void push_back(T value)                 // Adds an element to the end
 	{
 		if (len == cap)
@@ -176,12 +177,31 @@ public:
 		}
 		arr[len++] = value;
 	}
+	void push_back_pair(const T& first, const T& second)  // Adds a pair as two separate elements
+	{
+		push_back(first);
+		push_back(second);
+	}
 	void pop()         // Removes the last element
 	{
 		if (len > 0)
 		{
 			--len;
 		}
+	}
+	pair<T, T> pop_back_pair()    // Removes and returns the last two elements as a pair
+	{
+		if (len < 2)
+		{
+			throw std::runtime_error("Vector must have at least 2 elements to pop a pair");
+		}
+
+		T second = arr[len - 1];  // Get last element
+		T first = arr[len - 2];   // Get second-to-last element
+
+		len -= 2;  // Remove both elements
+
+		return make_pair(first, second);
 	}
 	void insert_at(int index, T value) // Inserts value at index
 	{
@@ -240,11 +260,11 @@ public:
 		T* temp_arr = arr;
 		int temp_len = len;
 		int temp_cap = cap;
-		
+
 		arr = other.arr;
 		len = other.len;
 		cap = other.cap;
-		
+
 		other.arr = temp_arr;
 		other.len = temp_len;
 		other.cap = temp_cap;
@@ -272,7 +292,7 @@ public:
 			arr[len - 1 - i] = temp;
 		}
 	}
-// Accessors
+	// Accessors
 	bool empty() const // Checks if array is empty
 	{
 		return (arr == nullptr || len == 0);
@@ -324,7 +344,34 @@ public:
 		}
 		return -1;
 	}
-// Return index of first instance, or -1 if non-existent*/
+
+	// Returns a pair containing the minimum and maximum elements
+	pair<T, T> min_max_pair() const
+	{
+		if (len == 0)
+		{
+			throw std::runtime_error("Vector is empty");
+		}
+
+		T min_val = arr[0];
+		T max_val = arr[0];
+
+		for (int i = 1; i < len; i++)
+		{
+			if (arr[i] < min_val)
+			{
+				min_val = arr[i];
+			}
+			if (arr[i] > max_val)
+			{
+				max_val = arr[i];
+			}
+		}
+
+		return make_pair(min_val, max_val);
+	}
+
+	// Return index of first instance, or -1 if non-existent*/
 	void print() const {
 		cout << "Array elements: ";
 		for (int i = 0; i < this->len; ++i) {

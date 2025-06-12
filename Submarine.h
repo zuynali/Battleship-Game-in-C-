@@ -3,6 +3,7 @@
 class Submarine :
     public Ship
 {
+public:
     Submarine();
 };
 
