@@ -3,6 +3,15 @@
 #include "Ship.h"
 #include "Vector.h"
 #include <random>
+#include"ParticleSystem.h"
+#include"Battleship.h"
+#include"Carrier.h"
+#include"Cruiser.h"
+#include"Destroyer.h"
+#include"Submarine.h"
+
+#ifndef BOARD_H
+#define BOARD_H
 
 class Board {
 private:
@@ -24,10 +33,10 @@ public:
         }
     }
 
-    bool canPlaceShip(int x, int y, int size) const {
+    bool canPlaceShip(int x, int y, int size, bool isVertical) const {
         for (int i = 0; i < size; i++) {
-            int newX = x + (i);
-            int newY = y + (0);
+            int newX = x + (isVertical ? 0 : i);
+            int newY = y + (isVertical ? i : 0);
 
             if (newX >= GRID_SIZE || newY >= GRID_SIZE) return false;
 
@@ -48,21 +57,22 @@ public:
         return true;
     }
 
-    bool placeShip(Ship* ship, int x, int y) {
+    bool placeShip(Ship* ship, int x, int y, bool isVertical) {
         int size = ship->getSize();
-        if (!canPlaceShip(x, y, size)) {
+        if (!canPlaceShip(x, y, size, isVertical)) {
             return false;
         }
 
         vector<pair<int, int>> coords;
         for (int i = 0; i < size; i++) {
-            int newX = x + (i);
-            int newY = y + (0);
+            int newX = x + (isVertical ? 0 : i);
+            int newY = y + (isVertical ? i : 0);
             grid[newX][newY] = CellState::SHIP;
             coords.push_back({ newX, newY });
         }
 
         ship->setCoordinates(coords);
+        ship->setIsVertical(isVertical);
         ships.push_back(ship);
         return true;
     }
@@ -81,7 +91,7 @@ public:
             int x = distX(rng);
             int y = distY(rng);
 
-            if (placeShip(ship, x, y)) {
+            if (placeShip(ship, x, y, isVertical)) {
                 return true;
             }
         }
@@ -210,6 +220,12 @@ public:
                         if (ship) {
                             DrawRectangleRec(cell, ship->getColor());
                             DrawRectangleLinesEx(cell, 2, BLACK);
+
+                            // Draw special ability indicator
+                            if (ship->getHasSpecialAbility() && ship->getAbilityUses() > 0) {
+                                DrawCircle((int)(cell.x + cell.width - 8),
+                                    (int)(cell.y + 8), 4, GOLD);
+                            }
                         }
                     }
                     break;
@@ -253,3 +269,6 @@ public:
         }
     }
 };
+
+
+#endif // !BOARD_H
