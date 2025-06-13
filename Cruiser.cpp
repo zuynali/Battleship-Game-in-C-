@@ -1,2 +1,2 @@
 #include "Cruiser.h"
-Cruiser::Cruiser() : Ship(3, ShipType::Cruisers, BROWN) {}
+Cruiser::Cruiser() : Ship(3, ShipType::CRUISER, BROWN) {}
