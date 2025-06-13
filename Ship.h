@@ -3,40 +3,61 @@
 #include "Vector.h"
 using namespace std;
 
+#ifndef SHIP_H
+#define SHIP_H
+
 class Ship {
 protected:
     int size;
-    Vector<pair<int, int>> coordinates;
+    vector<pair<int, int>> coordinates;
     int hits;
     ShipType type;
     Color color;
-
-    // Position and orientation
-    int x, y;
-    bool horizontal;
+    bool isVertical;
+    bool hasSpecialAbility;
+    int abilityUses;
 
 public:
-    Ship(int _size, ShipType _type, Color _color);
-    virtual ~Ship();
+    Ship(int _size, ShipType _type, Color _color) :
+        size(_size), hits(0), type(_type), color(_color),
+        coordinates(), isVertical(false), hasSpecialAbility(false), abilityUses(1) {
+    }
 
-    ShipType getType() const;
-    Color getColor() const;
-    int getSize() const;
-    void setCoordinates(const Vector<pair<int, int>>& coords);
-    bool isSunk() const;
-    bool occupies(int x, int y) const;
-    bool registerHit(int x, int y);
-    const Vector<pair<int, int>>& getCoordinates() const;
+    virtual ~Ship() {}
 
-    // Position and orientation methods
-    void setPosition(int _x, int _y);
-    void setOrientation(bool _horizontal);
-    int getX() const;
-    int getY() const;
-    bool isHorizontal() const;
+    ShipType getType() const { return type; }
+    Color getColor() const { return color; }
+    int getSize() const { return size; }
+    bool getIsVertical() const { return isVertical; }
+    void setIsVertical(bool vertical) { isVertical = vertical; }
+    bool getHasSpecialAbility() const { return hasSpecialAbility; }
+    int getAbilityUses() const { return abilityUses; }
+    void useAbility() { if (abilityUses > 0) abilityUses--; }
 
-    // Update coordinates based on position and orientation
-    void updateCoordinates();
+    void setCoordinates(const vector<pair<int, int>>& coords) {
+        coordinates = coords;
+    }
 
-    //virtual void activateSpecialAbility() {}
+    bool isSunk() const { return hits >= size; }
+
+    bool occupies(int x, int y) const {
+        return find(coordinates.begin(), coordinates.end(), make_pair(x, y)) != coordinates.end();
+    }
+
+    bool registerHit(int x, int y) {
+        if (occupies(x, y)) {
+            hits++;
+            return true;
+        }
+        return false;
+    }
+
+    const vector<pair<int, int>>& getCoordinates() const {
+        return coordinates;
+    }
+
+    virtual void activateSpecialAbility() {}
 };
+
+
+#endif // !SHIP_H
