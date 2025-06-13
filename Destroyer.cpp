@@ -1,2 +1,2 @@
 #include "Destroyer.h"
-Destroyer::Destroyer() : Ship(2, ShipType::Destroyers, MAROON) {}
+Destroyer::Destroyer() : Ship(2, ShipType::DESTROYER, MAROON) {}
