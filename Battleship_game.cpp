@@ -2,22 +2,25 @@
 //
 
 #include "Game.h"
-
+using namespace std;
 int main() {
-    InitWindow(screen_width, screen_height, "Battleship - Ultimate Edition");
-    SetTargetFPS(60);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Battleship OOP Project with all the concepts: ");
+    SetTargetFPS(60);//Frame rates of the screen 
+    //Raylib function so that the screen doesn't closes quickly
 
-    Game game;
+    Game game;//intialiazing the game
+    //from here the game will be started
 
-    while (!WindowShouldClose()) {
-        game.update();
-        BeginDrawing();
-        game.draw();
-        EndDrawing();
+    while (!WindowShouldClose()) {//game will be running until the window is closed raylib feature
+        game.update();// this will update the game and get ready the game to player according to the players settings
+        BeginDrawing();//raylib function to start the screen
+        game.draw();//this function will start drawing on the screen 
+        EndDrawing();//end the screen
     }
 
-    CloseWindow();
+    CloseWindow();//Ends the program
     return 0;
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
