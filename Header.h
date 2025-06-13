@@ -4,10 +4,15 @@
 #include <string>
 #include <random>
 #include <fstream>
+#include <algorithm>
 using namespace std;
 
+#ifndef HEADER_H
+#define HEADER_H
+
+
 const int SCREEN_WIDTH = 1400;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_HEIGHT = 900;
 const int GRID_SIZE = 10;
 const int CELL_SIZE = 45;
 const int BOARD_OFFSET_X = 100;
@@ -19,6 +24,7 @@ enum class CellState { EMPTY, SHIP, HIT, MISS, SINKING };
 enum class GameState { MAIN_MENU, SHIP_PLACEMENT, PLAYER1_TURN, PLAYER2_TURN, AI_TURN, GAME_OVER, SETTINGS, STATISTICS };
 enum class ShipType { DESTROYER, SUBMARINE, CRUISER, BATTLESHIP, CARRIER };
 enum class GameMode { PVP, PVE_EASY, PVE_MEDIUM, PVE_HARD };
+enum class PlacementMode { HORIZONTAL, VERTICAL };
 
 struct GameStats {
     int gamesPlayed = 0;
@@ -47,3 +53,5 @@ struct Animation {
     Color color;
     string text;
 };
+
+#endif 
