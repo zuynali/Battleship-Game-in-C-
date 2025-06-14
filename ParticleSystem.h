@@ -7,8 +7,8 @@
 
 class ParticleSystem {
 private:
-    vector<Particle> particles;
-    vector<Animation> animations;
+    Vector<Particle> particles;
+    Vector<Animation> animations;
 
 public:
     void addExplosion(Vector2 pos, Color color) {

@@ -9,7 +9,7 @@ using namespace std;
 class Ship {
 protected:
     int size;
-    vector<pair<int, int>> coordinates;
+    Vector<pair<int, int>> coordinates;
     int hits;
     ShipType type;
     Color color;
@@ -34,7 +34,7 @@ public:
     int getAbilityUses() const { return abilityUses; }
     void useAbility() { if (abilityUses > 0) abilityUses--; }
 
-    void setCoordinates(const vector<pair<int, int>>& coords) {
+    void setCoordinates(const Vector<pair<int, int>>& coords) {
         coordinates = coords;
     }
 
@@ -52,7 +52,7 @@ public:
         return false;
     }
 
-    const vector<pair<int, int>>& getCoordinates() const {
+    const Vector<pair<int, int>>& getCoordinates() const {
         return coordinates;
     }
 

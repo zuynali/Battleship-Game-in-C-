@@ -26,7 +26,7 @@ private:
     GameStats stats;
     ParticleSystem particleSystem;
     AI* ai;
-    vector<Ship*> shipsToPlace;
+    Vector<Ship*> shipsToPlace;
     int currentShipIndex;
     bool isPlacingShips;
     int selectedMenuItem;
@@ -429,7 +429,7 @@ private:
 
         playerBoard.draw(BOARD_OFFSET_X, false);
 
-if (currentShipIndex < shipsToPlace.size()) {
+        if (currentShipIndex < shipsToPlace.size()) {
             Vector2 mousePos = GetMousePosition();
             int gridX = (int)((mousePos.x - BOARD_OFFSET_X) / CELL_SIZE);
             int gridY = (int)((mousePos.y - BOARD_OFFSET_Y) / CELL_SIZE);
@@ -507,7 +507,6 @@ if (currentShipIndex < shipsToPlace.size()) {
             DrawText(thinkingText.c_str(), SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 40, 16, LIGHTGRAY);
         }
 
-        drawSpecialAbilities();
     }
 
     void drawGameInfo() {
@@ -549,18 +548,6 @@ if (currentShipIndex < shipsToPlace.size()) {
                 (int)infoPanel.x + 20, yOffset, 10, GREEN);
             yOffset += 15;
         }
-    }
-
-    void drawSpecialAbilities() {
-        Rectangle abilityPanel = { 50, SCREEN_HEIGHT - 150, 200, 100 };
-        DrawRectangleRounded(abilityPanel, 0.1f, 8, ColorAlpha(DARKGREEN, 0.8f));
-        DrawRectangleRoundedLines(abilityPanel, 0.1f, 8, GREEN);
-
-        DrawText("SPECIAL ABILITIES", (int)abilityPanel.x + 10, (int)abilityPanel.y + 10, 14, WHITE);
-        DrawText("Press S to activate", (int)abilityPanel.x + 10, (int)abilityPanel.y + 30, 10, LIGHTGRAY);
-        DrawText("• Battleship: 3x3 Attack", (int)abilityPanel.x + 10, (int)abilityPanel.y + 50, 10, YELLOW);
-        DrawText("• Submarine: Relocate", (int)abilityPanel.x + 10, (int)abilityPanel.y + 65, 10, YELLOW);
-        DrawText("• Carrier: Scout Area", (int)abilityPanel.x + 10, (int)abilityPanel.y + 80, 10, YELLOW);
     }
 
     void drawGameOver() {
@@ -621,35 +608,35 @@ if (currentShipIndex < shipsToPlace.size()) {
         DrawText("STATISTICS", SCREEN_WIDTH / 2 - 100, 100, 30, WHITE);
 
         int yPos = 200;
-        DrawText(TextFormat("Games Played: %d", stats.gamesPlayed), 200, yPos, 20, WHITE);
+        DrawText(TextFormat("Games Played:", stats.gamesPlayed), 200, yPos, 20, WHITE);
         yPos += 40;
 
-        DrawText(TextFormat("Player Wins: %d", stats.playerWins), 200, yPos, 20, GREEN);
+        DrawText(TextFormat("Player Wins:", stats.playerWins), 200, yPos, 20, GREEN);
         yPos += 30;
 
-        DrawText(TextFormat("AI Wins: %d", stats.aiWins), 200, yPos, 20, RED);
+        DrawText(TextFormat("AI Wins:", stats.aiWins), 200, yPos, 20, RED);
         yPos += 40;
 
         if (stats.gamesPlayed > 0) {
             float winRate = ((float)stats.playerWins / stats.gamesPlayed) * 100;
-            DrawText(TextFormat("Win Rate: %.1f%%", winRate), 200, yPos, 20, YELLOW);
+            DrawText(TextFormat("Win Rate:", winRate), 200, yPos, 20, YELLOW);
         }
         yPos += 40;
 
-        DrawText(TextFormat("Total Shots: %d", stats.totalShots), 200, yPos, 20, WHITE);
+        DrawText(TextFormat("Total Shots:", stats.totalShots), 200, yPos, 20, WHITE);
         yPos += 30;
 
-        DrawText(TextFormat("Average Accuracy: %.1f%%", stats.avgAccuracy), 200, yPos, 20, WHITE);
+        DrawText(TextFormat("Average Accuracy: ", stats.avgAccuracy), 200, yPos, 20, WHITE);
         yPos += 40;
 
         if (stats.longestGame < 999) {
-            DrawText(TextFormat("Longest Game: %d:%02d", stats.longestGame / 60, stats.longestGame % 60),
+            DrawText(TextFormat("Longest Game:", stats.longestGame / 60, stats.longestGame % 60),
                 200, yPos, 20, WHITE);
         }
         yPos += 30;
 
         if (stats.shortestGame < 999) {
-            DrawText(TextFormat("Shortest Game: %d:%02d", stats.shortestGame / 60, stats.shortestGame % 60),
+            DrawText(TextFormat("Shortest Game:", stats.shortestGame / 60, stats.shortestGame % 60),
                 200, yPos, 20, WHITE);
         }
 

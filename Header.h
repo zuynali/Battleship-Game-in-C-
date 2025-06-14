@@ -1,7 +1,5 @@
 #include "raylib.h"
 #include <iostream>
-#include <vector>
-#include <string>
 #include <random>
 #include <fstream>
 #include <algorithm>

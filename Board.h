@@ -9,14 +9,13 @@
 #include"Cruiser.h"
 #include"Destroyer.h"
 #include"Submarine.h"
-
 #ifndef BOARD_H
 #define BOARD_H
 
 class Board {
 private:
-    vector<vector<CellState>> grid;
-    vector<Ship*> ships;
+    Vector<vector<CellState>> grid;
+    Vector<Ship*> ships;
     random_device rd;
     mutable mt19937 rng;
     ParticleSystem* particleSystem;
@@ -63,7 +62,7 @@ public:
             return false;
         }
 
-        vector<pair<int, int>> coords;
+        Vector<pair<int, int>> coords;
         for (int i = 0; i < size; i++) {
             int newX = x + (isVertical ? 0 : i);
             int newY = y + (isVertical ? i : 0);
@@ -170,7 +169,7 @@ public:
         return CellState::EMPTY;
     }
 
-    const vector<vector<CellState>>& getGrid() const {
+    const Vector<vector<CellState>>& getGrid() const {
         return grid;
     }
 
