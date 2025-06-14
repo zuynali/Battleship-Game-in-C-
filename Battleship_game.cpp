@@ -2,7 +2,9 @@
 //
 
 #include "Game.h"
+#include<iostream>
 using namespace std;
+
 int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Battleship OOP Project with all the concepts: ");
     SetTargetFPS(60);//Frame rates of the screen 
