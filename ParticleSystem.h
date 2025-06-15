@@ -54,11 +54,10 @@ public:
     }
 
     void update(float deltaTime) {
-        // Update particles
         for (auto it = particles.begin(); it != particles.end();) {
             it->position.x += it->velocity.x * deltaTime;
             it->position.y += it->velocity.y * deltaTime;
-            it->velocity.y += 200 * deltaTime; // Gravity
+            it->velocity.y += 200 * deltaTime; //gravity
             it->life -= deltaTime;
 
             if (it->life <= 0) {
@@ -69,7 +68,6 @@ public:
             }
         }
 
-        // Update animations
         for (auto it = animations.begin(); it != animations.end();) {
             it->time += deltaTime;
             if (it->time >= it->duration) {
@@ -82,7 +80,7 @@ public:
     }
 
     void draw() {
-        // Draw particles
+        //draw particles
         for (const auto& p : particles) {
             float alpha = p.life / p.maxLife;
             Color color = p.color;
@@ -90,12 +88,12 @@ public:
             DrawCircleV(p.position, p.size, color);
         }
 
-        // Draw animations
+        //draw animations
         for (const auto& anim : animations) {
             float alpha = 1.0f - (anim.time / anim.duration);
             Color color = anim.color;
             color.a = (unsigned char)(255 * alpha);
-            float y_offset = -anim.time * 30; // Float upward
+            float y_offset = -anim.time * 30;
             DrawText(anim.text.c_str(),
                 (int)anim.position.x,
                 (int)(anim.position.y + y_offset),
