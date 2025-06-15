@@ -544,12 +544,31 @@ private:
 
         DrawText("BATTLESHIP WARFARE", SCREEN_WIDTH / 2 - 150, 20, 30, GOLD);
 
-        DrawText("YOUR FLEET", BOARD_OFFSET_X, BOARD_OFFSET_Y - 60, 20, WHITE);
-        playerBoard.draw(BOARD_OFFSET_X, false);
+        if (gameMode == GameMode::PVP) {
+            // In PvP mode show boards based on whose turn it is
+            if (state == GameState::PLAYER1_TURN) {
+                DrawText("YOUR FLEET (PLAYER 1)", BOARD_OFFSET_X, BOARD_OFFSET_Y - 60, 20, WHITE);
+                playerBoard.draw(BOARD_OFFSET_X, false);
 
-        const char* enemyLabel = (gameMode == GameMode::PVP) ? "ENEMY FLEET" : "AI FLEET";
-        DrawText(enemyLabel, BOARD_OFFSET_X + BOARD_SPACING, BOARD_OFFSET_Y - 60, 20, WHITE);
-        computerBoard.draw(BOARD_OFFSET_X + BOARD_SPACING, true);
+                DrawText("PLAYER 2 FLEET", BOARD_OFFSET_X + BOARD_SPACING, BOARD_OFFSET_Y - 60, 20, WHITE);
+                computerBoard.draw(BOARD_OFFSET_X + BOARD_SPACING, true); // Hide Player 2's ships
+            }
+            else if (state == GameState::PLAYER2_TURN) {
+                DrawText("PLAYER 1 FLEET", BOARD_OFFSET_X, BOARD_OFFSET_Y - 60, 20, WHITE);
+                playerBoard.draw(BOARD_OFFSET_X, true); // Hide Player 1's ships
+
+                DrawText("YOUR FLEET (PLAYER 2)", BOARD_OFFSET_X + BOARD_SPACING, BOARD_OFFSET_Y - 60, 20, WHITE);
+                computerBoard.draw(BOARD_OFFSET_X + BOARD_SPACING, false);
+            }
+        }
+        else {
+          
+            DrawText("YOUR FLEET", BOARD_OFFSET_X, BOARD_OFFSET_Y - 60, 20, WHITE);
+            playerBoard.draw(BOARD_OFFSET_X, false);
+
+            DrawText("AI FLEET", BOARD_OFFSET_X + BOARD_SPACING, BOARD_OFFSET_Y - 60, 20, WHITE);
+            computerBoard.draw(BOARD_OFFSET_X + BOARD_SPACING, true);
+        }
 
         drawGameInfo();
 
