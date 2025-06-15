@@ -1,5 +1,6 @@
 #pragma once
 #include "Header.h"
+#include"Vector.h"
 using namespace std;
 
 #ifndef AI_H
