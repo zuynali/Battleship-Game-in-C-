@@ -14,13 +14,12 @@ protected:
     ShipType type;
     Color color;
     bool isVertical;
-    bool hasSpecialAbility;
     int abilityUses;
 
 public:
     Ship(int _size, ShipType _type, Color _color) :
         size(_size), hits(0), type(_type), color(_color),
-        coordinates(), isVertical(false), hasSpecialAbility(false), abilityUses(1) {
+        coordinates(), isVertical(false), abilityUses(1) {
     }
 
     virtual ~Ship() {}
@@ -30,7 +29,6 @@ public:
     int getSize() const { return size; }
     bool getIsVertical() const { return isVertical; }
     void setIsVertical(bool vertical) { isVertical = vertical; }
-    bool getHasSpecialAbility() const { return hasSpecialAbility; }
     int getAbilityUses() const { return abilityUses; }
     void useAbility() { if (abilityUses > 0) abilityUses--; }
 
@@ -56,7 +54,6 @@ public:
         return coordinates;
     }
 
-    virtual void activateSpecialAbility() {}
 };
 
 

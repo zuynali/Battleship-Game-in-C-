@@ -384,7 +384,7 @@ public:
 		}
 		else
 		{
-			// Growing - need to add elements
+			// Growing need to add elements
 			if (new_size > cap)
 			{
 				// Need more capacity
@@ -418,12 +418,12 @@ public:
 
 		if (new_size <= len)
 		{
-			// Shrinking - just update length
+			// Shrinking just update length
 			len = new_size;
 		}
 		else
 		{
-			// Growing - need to add elements
+			// Growing need to add elements
 			if (new_size > cap)
 			{
 				// Need more capacity
@@ -523,7 +523,7 @@ public:
 	{
 		if (index < 0 || index >= len)
 		{
-			throw std::out_of_range("Index out of range");
+			throw out_of_range("Index out of range");
 		}
 		return arr[index];
 	}
@@ -532,7 +532,7 @@ public:
 	{
 		if (index < 0 || index >= len)
 		{
-			throw std::out_of_range("Index out of range");
+			throw out_of_range("Index out of range");
 		}
 		return arr[index];
 	}
@@ -540,7 +540,7 @@ public:
 	T& front() // Returns first element
 	{
 		if (len == 0) {
-			throw std::runtime_error("Vector is empty");
+			throw runtime_error("Vector is empty");
 		}
 		return arr[0];
 	}
@@ -548,7 +548,7 @@ public:
 	const T& front() const
 	{
 		if (len == 0) {
-			throw std::runtime_error("Vector is empty");
+			throw runtime_error("Vector is empty");
 		}
 		return arr[0];
 	}
@@ -556,7 +556,7 @@ public:
 	T& back() // Returns last element
 	{
 		if (len == 0) {
-			throw std::runtime_error("Vector is empty");
+			throw runtime_error("Vector is empty");
 		}
 		return arr[len - 1];
 	}
@@ -564,7 +564,7 @@ public:
 	const T& back() const
 	{
 		if (len == 0) {
-			throw std::runtime_error("Vector is empty");
+			throw runtime_error("Vector is empty");
 		}
 		return arr[len - 1];
 	}
@@ -697,14 +697,14 @@ public:
 	// Get coordinate at specific index
 	pair<int, int>& getCoordinate(int index) {
 		if (index < 0 || index >= static_cast<int>(coordinates.size())) {
-			throw std::out_of_range("Coordinate index out of range");
+			throw out_of_range("Coordinate index out of range");
 		}
 		return coordinates[index];
 	}
 
 	const pair<int, int>& getCoordinate(int index) const {
 		if (index < 0 || index >= static_cast<int>(coordinates.size())) {
-			throw std::out_of_range("Coordinate index out of range");
+			throw out_of_range("Coordinate index out of range");
 		}
 		return coordinates[index];
 	}

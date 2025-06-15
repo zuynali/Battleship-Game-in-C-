@@ -9,6 +9,8 @@
 #include"Cruiser.h"
 #include"Destroyer.h"
 #include"Submarine.h"
+using namespace std;
+
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -39,7 +41,7 @@ public:
 
             if (newX >= GRID_SIZE || newY >= GRID_SIZE) return false;
 
-            // Check for ships and adjacent cells
+            //check for ships and adjacent cells
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     int checkX = newX + dx;
@@ -194,7 +196,7 @@ public:
 
     void draw(int offsetX, bool hideShips, bool showGrid = true) const {
         if (showGrid) {
-            // Draw grid background
+            //draw grid background
             DrawRectangle(offsetX - 5, BOARD_OFFSET_Y - 5,
                 GRID_SIZE * CELL_SIZE + 10,
                 GRID_SIZE * CELL_SIZE + 10, DARKBLUE);
@@ -219,12 +221,6 @@ public:
                         if (ship) {
                             DrawRectangleRec(cell, ship->getColor());
                             DrawRectangleLinesEx(cell, 2, BLACK);
-
-                            // Draw special ability indicator
-                            if (ship->getHasSpecialAbility() && ship->getAbilityUses() > 0) {
-                                DrawCircle((int)(cell.x + cell.width - 8),
-                                    (int)(cell.y + 8), 4, GOLD);
-                            }
                         }
                     }
                     break;
@@ -244,7 +240,7 @@ public:
                     break;
                 }
 
-                // Highlight on hover
+                //highlights on hover
                 Vector2 mousePos = GetMousePosition();
                 if (CheckCollisionPointRec(mousePos, cell) && !hideShips) {
                     DrawRectangleLinesEx(cell, 3, YELLOW);
@@ -252,7 +248,7 @@ public:
             }
         }
 
-        // Draw coordinate labels
+        //draw coordinate labels
         for (int x = 0; x < GRID_SIZE; x++) {
             char label = 'A' + x;
             DrawText(TextFormat("%c", label),

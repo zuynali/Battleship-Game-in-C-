@@ -2,8 +2,7 @@
 #include <iostream>
 #include <random>
 #include <fstream>
-#include <algorithm>
-using namespace std;
+#include "Vector.h"
 
 #ifndef HEADER_H
 #define HEADER_H
@@ -31,8 +30,10 @@ struct GameStats {
     int totalShots = 0;
     int totalHits = 0;
     float avgAccuracy = 0.0f;
+    int shortestGame = 0;
     int longestGame = 0;
-    int shortestGame = 999;
+    int playerLevel = 1;
+    int experience = 0;
 };
 
 struct Particle {

@@ -1,6 +1,6 @@
 #pragma once
 #include "Header.h"
-
+using namespace std;
 
 #ifndef AI_H
 #define AI_H
@@ -17,14 +17,14 @@ public:
     AI(GameMode diff) : difficulty(diff), rng(rd()) {}
 
     pair<int, int> getNextTarget(const vector<vector<CellState>>& enemyGrid) {
-        // Hunt mode - if we have targets from previous hits
+        //if we have targets from previous hits
         if (!huntTargets.empty() && difficulty != GameMode::PVE_EASY) {
             auto target = huntTargets.back();
             huntTargets.pop_back();
             return target;
         }
 
-        // Different strategies based on difficulty
+        //different strategies based on difficulty
         switch (difficulty) {
         case GameMode::PVE_EASY:
             return getRandomTarget(enemyGrid);
@@ -40,7 +40,7 @@ public:
     void registerHit(int x, int y, const vector<vector<CellState>>& enemyGrid) {
         if (difficulty == GameMode::PVE_EASY) return;
 
-        // Add adjacent cells to hunt targets
+        //add adjacent cells to hunt targets
         vector<pair<int, int>> directions = { {0,1}, {0,-1}, {1,0}, {-1,0} };
         for (auto& dir : directions) {
             int newX = x + dir.first;
@@ -66,11 +66,11 @@ private:
             }
             attempts++;
         }
-        return { 0, 0 }; // Fallback
+        return { 0, 0 }; 
     }
 
     pair<int, int> getMediumTarget(const vector<vector<CellState>>& enemyGrid) {
-        // Checkerboard pattern for better coverage
+        //checkerboard pattern for better coverage
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int y = 0; y < GRID_SIZE; y++) {
                 if ((x + y) % 2 == 0 &&
@@ -83,10 +83,10 @@ private:
     }
 
     pair<int, int> getHardTarget(const vector<vector<CellState>>& enemyGrid) {
-        // Advanced strategy: target areas with highest probability
+        //target areas with highest probability
         vector<vector<int>> probability(GRID_SIZE, vector<int>(GRID_SIZE, 0));
 
-        // Calculate probability based on possible ship placements
+        //calculate probability based on possible ship placements
         for (int x = 0; x < GRID_SIZE; x++) {
             for (int y = 0; y < GRID_SIZE; y++) {
                 if (enemyGrid[x][y] == CellState::EMPTY || enemyGrid[x][y] == CellState::SHIP) {
@@ -95,7 +95,7 @@ private:
             }
         }
 
-        // Find highest probability cell
+        //highest probability cell
         int maxProb = 0;
         pair<int, int> bestTarget = { 0, 0 };
         for (int x = 0; x < GRID_SIZE; x++) {
@@ -112,10 +112,10 @@ private:
 
     int calculateCellProbability(int x, int y, const vector<vector<CellState>>& enemyGrid) {
         int probability = 0;
-        vector<int> shipSizes = { 2, 3, 3, 4, 5 }; // Remaining ship sizes
+        vector<int> shipSizes = { 2, 3, 3, 4, 5 }; //total ship sizes
 
         for (int size : shipSizes) {
-            // Check horizontal placement
+            //check horizontal placement
             bool canPlaceHorizontal = true;
             if (x + size <= GRID_SIZE) {
                 for (int i = 0; i < size; i++) {
@@ -128,7 +128,7 @@ private:
                 if (canPlaceHorizontal) probability++;
             }
 
-            // Check vertical placement
+            //check vertical placement
             bool canPlaceVertical = true;
             if (y + size <= GRID_SIZE) {
                 for (int i = 0; i < size; i++) {

@@ -4,11 +4,13 @@
 #include "AI.h"
 #include "ParticleSystem.h"
 #include "Vector.h"
-#include"Battleship.h"
-#include"Carrier.h"
-#include"Cruiser.h"
-#include"Destroyer.h"
-#include"Submarine.h"
+#include "Battleship.h"
+#include "Carrier.h"
+#include "Cruiser.h"
+#include "Destroyer.h"
+#include "Submarine.h"
+#include <iostream>
+#include <fstream>
 using namespace std;
 
 #ifndef GAME_H
@@ -36,12 +38,13 @@ private:
     float turnTimer;
     float gameTimer;
     int shotCount;
+    int playerHits;
+    int playerLevel;
 
     Rectangle playButton = { SCREEN_WIDTH / 2 - 100, 300, 200, 50 };
     Rectangle pvpButton = { SCREEN_WIDTH / 2 - 100, 370, 200, 50 };
     Rectangle settingsButton = { SCREEN_WIDTH / 2 - 100, 440, 200, 50 };
-    Rectangle statsButton = { SCREEN_WIDTH / 2 - 100, 510, 200, 50 };
-    Rectangle quitButton = { SCREEN_WIDTH / 2 - 100, 580, 200, 50 };
+    Rectangle quitButton = { SCREEN_WIDTH / 2 - 100, 510, 200, 50 };
 
 public:
     Game() : playerBoard(&particleSystem), computerBoard(&particleSystem),
@@ -49,21 +52,22 @@ public:
         placementMode(PlacementMode::HORIZONTAL), winner(0), currentPlayer(1),
         ai(nullptr), currentShipIndex(0), isPlacingShips(false),
         selectedMenuItem(0), selectedDifficulty(1), showStats(false),
-        showSettings(false), turnTimer(0), gameTimer(0), shotCount(0) {
+        showSettings(false), turnTimer(0), gameTimer(0), shotCount(0),
+        playerHits(0), playerLevel(1) {
 
-        loadStats();//this loads all the stats of the user from the log file
-        initializeShipsToPlace();//initializes all the ships to be placed on board
+        loadStats(); 
+        initializeShipsToPlace();    
     }
 
     ~Game() {
         saveStats();
-        delete ai;//using auto because different ships have different data types
+        delete ai;
         for (auto ship : shipsToPlace) {
             delete ship;
         }
     }
 
-    void initializeShipsToPlace() {//initializes all the ships to be placed on board
+    void initializeShipsToPlace() {
         shipsToPlace.clear();
         shipsToPlace.push_back(new Carrier());
         shipsToPlace.push_back(new Battleship());
@@ -72,7 +76,7 @@ public:
         shipsToPlace.push_back(new Destroyer());
     }
 
-    void startNewGame() {//this reset all the stats of the user
+    void startNewGame() {
         playerBoard.reset();
         computerBoard.reset();
         delete ai;
@@ -85,7 +89,102 @@ public:
         turnTimer = 0;
         gameTimer = 0;
         shotCount = 0;
+        playerHits = 0;
         currentPlayer = 1;
+    }
+
+    void calculatePlayerLevel() {
+        stats.experience = stats.gamesPlayed + (stats.playerWins * 2);
+        playerLevel = 1 + (stats.experience / 5); //level up every 5 experience points
+        if (playerLevel > 50) playerLevel = 50; //maximum level is 50
+        stats.playerLevel = playerLevel;
+    }
+
+    void updateGameStats() {
+        stats.totalShots += shotCount;
+
+        //update total hits based on current game hits
+        stats.totalHits += playerHits;
+
+        //recalculate accuracy based on total hits and shots
+        if (stats.totalShots > 0) {
+            stats.avgAccuracy = ((float)stats.totalHits / stats.totalShots) * 100.0f;
+        }
+
+        int gameLength = (int)gameTimer;
+
+        if (stats.shortestGame == 0 || (gameLength > 0 && gameLength < stats.shortestGame)) {
+            stats.shortestGame = gameLength;
+        }
+
+        if (gameLength > stats.longestGame) {
+            stats.longestGame = gameLength;
+        }
+
+        calculatePlayerLevel();
+
+        saveStats();
+    }
+
+    void loadStats() {
+        ifstream file("battleship_stats.bin", ios::binary);
+        if (!file) {
+            throw runtime_error("No file");
+        }
+        if (file.is_open()) {
+            file.read(reinterpret_cast<char*>(&stats), sizeof(GameStats));
+            file.close();
+
+            if (stats.playerLevel < 1) stats.playerLevel = 1;
+            if (stats.experience < 0) stats.experience = 0;
+
+            playerLevel = stats.playerLevel;
+
+            calculatePlayerLevel();
+
+            cout << "Stats loaded from battleship_stats.bin successfully!" << endl;
+        }
+        else {
+            stats = GameStats();
+            stats.shortestGame = 0;
+            stats.longestGame = 0;
+            stats.avgAccuracy = 0.0f;
+            stats.playerLevel = 1;
+            stats.experience = 0;
+            playerLevel = 1;
+
+            cout << "No existing stats file found. Creating new stats..." << endl;
+            saveStats(); // Create initial .bin file
+        }
+    }
+
+    void saveStats() {
+        stats.playerLevel = playerLevel;
+        stats.experience = stats.gamesPlayed + (stats.playerWins * 2);
+
+        ofstream file("battleship_stats.bin", ios::binary);
+        if (!file) {
+            throw runtime_error("No file");
+        }
+        if (file.is_open()) {
+            file.write(reinterpret_cast<const char*>(&stats), sizeof(GameStats));
+            file.close();
+            cout << "Stats saved to battleship_stats.bin successfully!" << endl;
+        }
+        else {
+            cout << "Error: Could not save stats to battleship_stats.bin!" << endl;
+        }
+    }
+
+    void resetStats() {
+        stats = GameStats();
+        stats.shortestGame = 0;
+        stats.longestGame = 0;
+        stats.avgAccuracy = 0.0f;
+        stats.playerLevel = 1;
+        stats.experience = 0;
+        playerLevel = 1;
+        saveStats();
     }
 
     void update() {
@@ -113,24 +212,27 @@ public:
         case GameState::SETTINGS:
             updateSettings();
             break;
-        case GameState::STATISTICS:
-            updateStatistics();
-            break;
         }
 
         if (state == GameState::PLAYER1_TURN || state == GameState::PLAYER2_TURN || state == GameState::AI_TURN) {
             if (playerBoard.allShipsSunk()) {
-                winner = (gameMode == GameMode::PVP) ? 2 : 0;
+                winner = (gameMode == GameMode::PVP) ? 2 : 0; // AI or Player 2 wins
                 state = GameState::GAME_OVER;
                 stats.gamesPlayed++;
-                if (gameMode != GameMode::PVP) stats.aiWins++;
+
+                if (gameMode == GameMode::PVP) {
+                    //in player vs player mode player 2 wins
+                }
+                else {
+                    stats.aiWins++;
+                }
                 updateGameStats();
             }
             else if (computerBoard.allShipsSunk()) {
-                winner = 1; // Player 1 wins
+                winner = 1; //player 1 wins
                 state = GameState::GAME_OVER;
                 stats.gamesPlayed++;
-                stats.playerWins++;
+                stats.playerWins++; //player wins
                 updateGameStats();
             }
         }
@@ -151,15 +253,11 @@ public:
             else if (CheckCollisionPointRec(mousePos, settingsButton)) {
                 state = GameState::SETTINGS;
             }
-            else if (CheckCollisionPointRec(mousePos, statsButton)) {
-                state = GameState::STATISTICS;
-            }
             else if (CheckCollisionPointRec(mousePos, quitButton)) {
-                
+
             }
         }
 
-        // Keyboard navigation
         if (IsKeyPressed(KEY_UP)) selectedMenuItem = max(0, selectedMenuItem - 1);
         if (IsKeyPressed(KEY_DOWN)) selectedMenuItem = min(4, selectedMenuItem + 1);
         if (IsKeyPressed(KEY_ENTER)) {
@@ -168,7 +266,7 @@ public:
             case 1: gameMode = GameMode::PVP; startNewGame(); break;
             case 2: state = GameState::SETTINGS; break;
             case 3: state = GameState::STATISTICS; break;
-            case 4: break; //game will end 
+            case 4: break;
             }
         }
     }
@@ -238,6 +336,12 @@ public:
                 if (targetBoard->attack(gridX, gridY)) {
                     shotCount++;
 
+                    //check if it was a hit and update player hits
+                    if (targetBoard->getCellState(gridX, gridY) == CellState::HIT) {
+                        playerHits++;
+                        stats.totalHits++; //update total hits in stats
+                    }
+
                     if (gameMode == GameMode::PVP) {
                         state = (state == GameState::PLAYER1_TURN) ?
                             GameState::PLAYER2_TURN : GameState::PLAYER1_TURN;
@@ -257,7 +361,7 @@ public:
 
     void updateAITurn(float deltaTime) {
         turnTimer += deltaTime;
-        if (turnTimer >= 1.0f) { // 1 second delay for AI move
+        if (turnTimer >= 1.0f) {
             auto target = ai->getNextTarget(playerBoard.getGrid());
 
             if (playerBoard.attack(target.first, target.second)) {
@@ -300,40 +404,6 @@ public:
         }
     }
 
-    void updateGameStats() {
-        stats.totalShots += shotCount;
-        if (shotCount > 0) {
-            stats.avgAccuracy = (float)stats.totalHits / stats.totalShots * 100;
-        }
-
-        int gameLength = (int)gameTimer;
-        if (gameLength > stats.longestGame) stats.longestGame = gameLength;
-        if (gameLength < stats.shortestGame) stats.shortestGame = gameLength;
-
-        saveStats();
-    }
-
-    void loadStats() {
-        ifstream file("battleship_stats.dat", ios::binary);
-        if (file.is_open()) {
-            file.read(reinterpret_cast<char*>(&stats), sizeof(GameStats));
-            file.close();
-        }
-    }
-
-    void saveStats() {
-        ofstream file("battleship_stats.dat", ios::binary);
-        if (file.is_open()) {
-            file.write(reinterpret_cast<const char*>(&stats), sizeof(GameStats));
-            file.close();
-        }
-    }
-
-    void resetStats() {
-        stats = GameStats();
-        saveStats();
-    }
-
     void draw() {
         ClearBackground(BLACK);
 
@@ -356,9 +426,6 @@ public:
         case GameState::SETTINGS:
             drawSettings();
             break;
-        case GameState::STATISTICS:
-            drawStatistics();
-            break;
         }
 
         particleSystem.draw();
@@ -368,7 +435,7 @@ private:
     void drawMainMenu() {
         for (int i = 0; i < SCREEN_HEIGHT; i++) {
             float alpha = (float)i / SCREEN_HEIGHT;
-            Color color = ColorLerp(DARKBLUE, MAROON, alpha);//for the gradient effect of the game
+            Color color = ColorLerp(DARKBLUE, MAROON, alpha);
             DrawLine(0, i, SCREEN_WIDTH, i, color);
         }
 
@@ -378,6 +445,8 @@ private:
 
         DrawText("ULTIMATE EDITION", SCREEN_WIDTH / 2 - 120, 170, 20, LIGHTGRAY);
 
+        DrawText(TextFormat("PLAYER LEVEL: %d", playerLevel), 50, 50, 20, GOLD);
+
         Vector2 mousePos = GetMousePosition();
 
         drawMenuButton(playButton, "PLAY vs AI", selectedMenuItem == 0 ||
@@ -386,20 +455,18 @@ private:
             CheckCollisionPointRec(mousePos, pvpButton));
         drawMenuButton(settingsButton, "SETTINGS", selectedMenuItem == 2 ||
             CheckCollisionPointRec(mousePos, settingsButton));
-        drawMenuButton(statsButton, "STATISTICS", selectedMenuItem == 3 ||
-            CheckCollisionPointRec(mousePos, statsButton));
-        drawMenuButton(quitButton, "QUIT", selectedMenuItem == 4 ||
+        drawMenuButton(quitButton, "QUIT", selectedMenuItem == 3 ||
             CheckCollisionPointRec(mousePos, quitButton));
 
         DrawText("AI DIFFICULTY:", SCREEN_WIDTH / 2 - 80, 650, 20, WHITE);
         const char* difficulties[] = { "EASY", "MEDIUM", "HARD" };
         for (int i = 0; i < 3; i++) {
-            Color color = (i == selectedDifficulty) ? YELLOW : LIGHTGRAY;//the mode which is selected will have a yellow color else will have lightgray color
+            Color color = (i == selectedDifficulty) ? YELLOW : LIGHTGRAY;
             DrawText(difficulties[i], SCREEN_WIDTH / 2 - 60 + i * 80, 680, 16, color);
         }
 
         DrawText("Use ARROW KEYS and ENTER to navigate", 50, SCREEN_HEIGHT - 60, 16, RAYWHITE);
-        DrawText("Press ESC anytime to return to menu", 50, SCREEN_HEIGHT - 40, 16, RAYWHITE);//using raywhite for clarity in reading
+        DrawText("Press Backspace to return to menu", 50, SCREEN_HEIGHT - 40, 16, RAYWHITE);
     }
 
     void drawMenuButton(Rectangle button, const char* text, bool highlighted) {
@@ -422,7 +489,7 @@ private:
         if (currentShipIndex < shipsToPlace.size()) {
             Ship* currentShip = shipsToPlace[currentShipIndex];
             const char* shipNames[] = { "Destroyer", "Submarine", "Cruiser", "Battleship", "Carrier" };
-            DrawText(TextFormat("Place your (Size:)",
+            DrawText(TextFormat("Place your %s (Size: %d)",
                 shipNames[(int)currentShip->getType()], currentShip->getSize()),
                 50, 100, 20, WHITE);
         }
@@ -463,14 +530,12 @@ private:
         DrawText("A: Auto-place remaining ships", 50, SCREEN_HEIGHT - 80, 16, RAYWHITE);
 
         const char* orientationText = (placementMode == PlacementMode::HORIZONTAL) ? "HORIZONTAL" : "VERTICAL";
-        DrawText(TextFormat("Orientation:", orientationText), 50, SCREEN_HEIGHT - 60, 16, YELLOW);
+        DrawText(TextFormat("Orientation: %s", orientationText), 50, SCREEN_HEIGHT - 60, 16, YELLOW);
 
-        // Progress indicator
-        DrawText(TextFormat("Ships placed: /5", currentShipIndex), SCREEN_WIDTH - 200, 100, 16, RAYWHITE);
+        DrawText(TextFormat("Ships placed: %d/5", currentShipIndex), SCREEN_WIDTH - 200, 100, 16, RAYWHITE);
     }
 
     void drawGameplay() {
-        // Background
         for (int i = 0; i < SCREEN_HEIGHT; i++) {
             float alpha = (float)i / SCREEN_HEIGHT * 0.3f;
             Color color = ColorLerp(BLUE, BLACK, alpha);
@@ -500,18 +565,16 @@ private:
         else if (state == GameState::AI_TURN) {
             DrawText("AI THINKING...", SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT - 60, 20, RED);
 
-            // AI thinking animation
             int dots = (int)(GetTime() * 3) % 4;
             string thinkingText = "Computing";
             for (int i = 0; i < dots; i++) thinkingText += ".";
             DrawText(thinkingText.c_str(), SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT - 40, 16, LIGHTGRAY);
         }
-
     }
 
     void drawGameInfo() {
-        Rectangle infoPanel = { SCREEN_WIDTH - 200, 180, 260, 300 };
-        DrawRectangleRounded(infoPanel, 0.1f, 8, ColorAlpha(BLACK, 0.8f));
+        Rectangle infoPanel = { SCREEN_WIDTH - 180, 280, 160, 320 };
+        DrawRectangleRounded(infoPanel, 0.1f, 8, ColorAlpha(RED, 0.8f));
         DrawRectangleRoundedLines(infoPanel, 0.1f, 8, DARKGRAY);
 
         int yOffset = (int)infoPanel.y + 20;
@@ -519,17 +582,24 @@ private:
         DrawText("GAME INFO", (int)infoPanel.x + 20, yOffset, 18, RAYWHITE);
         yOffset += 30;
 
-        DrawText(TextFormat("Time:", (int)gameTimer / 60, (int)gameTimer % 60),
+        DrawText(TextFormat("Level: %d", playerLevel), (int)infoPanel.x + 20, yOffset, 14, GOLD);
+        yOffset += 20;
+
+        DrawText(TextFormat("Time: %d:%02d", (int)gameTimer / 60, (int)gameTimer % 60),
             (int)infoPanel.x + 20, yOffset, 14, LIGHTGRAY);
         yOffset += 20;
 
-        DrawText(TextFormat("Shots:", shotCount),
+        DrawText(TextFormat("Shots: %d", shotCount),
+            (int)infoPanel.x + 20, yOffset, 14, LIGHTGRAY);
+        yOffset += 20;
+
+        DrawText(TextFormat("Hits: %d", playerHits),
             (int)infoPanel.x + 20, yOffset, 14, LIGHTGRAY);
         yOffset += 20;
 
         if (shotCount > 0) {
-            float accuracy = ((float)stats.totalHits / shotCount) * 100;
-            DrawText(TextFormat("Accuracy:", accuracy),
+            float currentAccuracy = ((float)playerHits / shotCount) * 100;
+            DrawText(TextFormat("Accuracy: %.1f%%", currentAccuracy),
                 (int)infoPanel.x + 20, yOffset, 14, LIGHTGRAY);
         }
         yOffset += 30;
@@ -537,14 +607,14 @@ private:
         DrawText("CONTROLS:", (int)infoPanel.x + 20, yOffset, 16, YELLOW);
         yOffset += 25;
         DrawText("ESC - Menu", (int)infoPanel.x + 20, yOffset, 12, LIGHTGRAY);
-        yOffset += 25;
-        // Ship status
+        yOffset += 20;
+
         DrawText("FLEET STATUS:", (int)infoPanel.x + 20, yOffset, 16, YELLOW);
         yOffset += 25;
 
         const char* shipNames[] = { "Destroyer", "Submarine", "Cruiser", "Battleship", "Carrier" };
         for (int i = 0; i < 5; i++) {
-            DrawText(TextFormat("OK", shipNames[i]),
+            DrawText(TextFormat("%s: OK", shipNames[i]),
                 (int)infoPanel.x + 20, yOffset, 10, GREEN);
             yOffset += 15;
         }
@@ -570,9 +640,9 @@ private:
         int textWidth = MeasureText(winnerText, 30);
         DrawText(winnerText, SCREEN_WIDTH / 2 - textWidth / 2, SCREEN_HEIGHT / 2 - 50, 30, winnerColor);
 
-        DrawText(TextFormat("Game Time:", (int)gameTimer / 60, (int)gameTimer % 60),
+        DrawText(TextFormat("Game Time: %d:%02d", (int)gameTimer / 60, (int)gameTimer % 60),
             SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT / 2 - 10, 16, WHITE);
-        DrawText(TextFormat("Total Shots:", shotCount),
+        DrawText(TextFormat("Total Shots: %d", shotCount),
             SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 10, 16, WHITE);
 
         DrawText("R - Play Again", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 40, 16, YELLOW);
@@ -584,8 +654,8 @@ private:
 
         DrawText("SETTINGS", SCREEN_WIDTH / 2 - 80, 100, 30, WHITE);
 
-        DrawText("Sound Effects:", 200, 200, 20, WHITE);
-      
+        DrawText("Sound Effects: Enabled", 200, 200, 20, WHITE);
+
         DrawText("AI Difficulty:", 200, 250, 20, WHITE);
         const char* difficulties[] = { "EASY", "MEDIUM", "HARD" };
         for (int i = 0; i < 3; i++) {
@@ -599,50 +669,9 @@ private:
         DrawText("Controls:", 200, 450, 20, YELLOW);
         DrawText("S - Toggle Sound", 220, 480, 16, WHITE);
         DrawText("UP/DOWN - Change Difficulty", 220, 500, 16, WHITE);
-        DrawText("ESC - Return to Menu", 220, 520, 16, WHITE);
+        DrawText("Backspace - Return to Menu", 220, 520, 16, WHITE);
     }
 
-    void drawStatistics() {
-        ClearBackground(DARKBLUE);
-
-        DrawText("STATISTICS", SCREEN_WIDTH / 2 - 100, 100, 30, WHITE);
-
-        int yPos = 200;
-        DrawText(TextFormat("Games Played:", stats.gamesPlayed), 200, yPos, 20, WHITE);
-        yPos += 40;
-
-        DrawText(TextFormat("Player Wins:", stats.playerWins), 200, yPos, 20, GREEN);
-        yPos += 30;
-
-        DrawText(TextFormat("AI Wins:", stats.aiWins), 200, yPos, 20, RED);
-        yPos += 40;
-
-        if (stats.gamesPlayed > 0) {
-            float winRate = ((float)stats.playerWins / stats.gamesPlayed) * 100;
-            DrawText(TextFormat("Win Rate:", winRate), 200, yPos, 20, YELLOW);
-        }
-        yPos += 40;
-
-        DrawText(TextFormat("Total Shots:", stats.totalShots), 200, yPos, 20, WHITE);
-        yPos += 30;
-
-        DrawText(TextFormat("Average Accuracy: ", stats.avgAccuracy), 200, yPos, 20, WHITE);
-        yPos += 40;
-
-        if (stats.longestGame < 999) {
-            DrawText(TextFormat("Longest Game:", stats.longestGame / 60, stats.longestGame % 60),
-                200, yPos, 20, WHITE);
-        }
-        yPos += 30;
-
-        if (stats.shortestGame < 999) {
-            DrawText(TextFormat("Shortest Game:", stats.shortestGame / 60, stats.shortestGame % 60),
-                200, yPos, 20, WHITE);
-        }
-
-        DrawText("R - Reset Statistics", 200, SCREEN_HEIGHT - 100, 16, YELLOW);
-        DrawText("ESC - Return to Menu", 200, SCREEN_HEIGHT - 80, 16, WHITE);
-    }
 };
 
 #endif
